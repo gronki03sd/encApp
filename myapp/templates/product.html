@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    select.form-select {
+        border: 2px solid #f4c2c2;        /* soft baby pink border */
+        background-color: #ffe6ea;        /* very light pink background */
+        color: #d63384;                  /* stronger pink for text (Bootstrap pink) */
+        font-weight: bold;
+        width: 100px;
+        margin: 10px auto;
+        text-align: center;
+        border-radius: 0.5rem;           /* slightly rounded corners */
+        transition: all 0.3s ease;
+    }
+    
+    select.form-select:hover, 
+    select.form-select:focus {
+        border-color: #d63384;           /* deeper pink on hover/focus */
+        box-shadow: 0 0 8px #f4c2c2;     /* soft glow effect */
+        outline: none;
+    }
+    </style>
+    
+<div class="container mt-4">
+    <div class="card mb-3">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="{{ product.image.url }}" class="img-fluid rounded-start" alt="{{ product.name }}">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+
+                    {% if product.is_sale %}
+                        <p class="text-warning">Sale!</p>
+                        <p>
+                            <del>MAD {{ product.price }}</del><br> ID: {{ product.id }}
+                            &nbsp;
+                            <strong>MAD {{ product.sale_price }}</strong>
+                        </p>
+                    {% else %}
+                        <p><strong>MAD {{ product.price }}</strong></p>
+                    {% endif %}
+
+                    <div>Quantity:</div>
+                    <select class="form-select" id="qty-cart">  
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+
+                    <a href="{% url 'home' %}" class="btn btn-secondary mt-2">Home</a>
+
+                    <button type="button" value="{{ product.id }}" id="add-cart" class="btn btn-secondary mt-2">Add To Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('click', '#add-cart', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "cart_add" %}',
+            data: {
+                product_id: $('#add-cart').val(),
+                product_qty: $('#qty-cart option:selected').text(),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: "post"
+            },
+            success: function (json) {
+                document.getElementById("cart_quantity").textContent = json.qty;
+                location.reload();  // Reload the page to reflect the changes
+
+            },
+            error: function (xhr, errmsg, err) {
+                console.error(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- Header -->
+<!-- Header Wrapper with more width -->
+<div style="margin: 0 auto; max-width: 1400px; padding: 0 1.5rem;">
+    <header style="
+        background-color: #ffd9e6;
+        border-top: 100px solid #eb437b;
+        border-bottom: 160px solid #cc3366;
+        border-left: none;
+        border-right: none;
+        border-radius: 16px;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08);">
+        
+        <div class="container py-5">
+            <div class="text-center">
+                <h1 class="display-4 fw-bolder text-dark">Dress Like You</h1>
+                <p class="lead fw-normal text-dark mb-0">With lustre</p>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+
+
+
+<!-- Section -->
+<section class="py-5 bg-light">
+    <div class="container px-4 px-lg-5 mt-5">
+        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+
+            {% for product in products %}
+
+            {% if product.is_sale %}
+            <div class="col mb-5">
+                <div class="card h-100 border-dark shadow-sm">
+                    <!-- Sale badge -->
+                    <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem;">Sales</div>
+
+                    <!-- Product image -->
+                    <img class="card-img-top" src="{{ product.image.url }}" alt="{{ product.name }}" />
+
+                    <!-- Product details -->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <h5 class="fw-bolder">{{ product.name }}</h5>
+                            <div class="d-flex justify-content-center small text-warning mb-2">
+                                <div class="bi-star-fill"></div>
+                                &nbsp;&nbsp; Sale! &nbsp;&nbsp;
+                                <div class="bi-star-fill"></div>
+                            </div>
+                            <strike>mad{{ product.price }}</strike>
+                            &nbsp;
+                            <strong>mad{{ product.sale_price }}</strong><br>
+                            <small class="text-muted">{{ product.description }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Product actions -->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View Product</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <div class="col mb-5">
+                <div class="card h-100 border-secondary shadow-sm">
+                    <!-- Product image -->
+                    <img class="card-img-top" src="{{ product.image.url }}" alt="{{ product.name }}" />
+
+                    <!-- Product details -->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <h5 class="fw-bolder">{{ product.name }}</h5>
+                            <strong>mad{{ product.price }}</strong><br>
+                            <small class="text-muted">{{ product.description }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Product actions -->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-dark mt-auto" href="{% url 'product' product.id %}">View Product</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    select.form-select {
+        border: 2px solid #f4c2c2;        /* soft baby pink border */
+        background-color: #ffe6ea;        /* very light pink background */
+        color: #d63384;                  /* stronger pink for text (Bootstrap pink) */
+        font-weight: bold;
+        width: 100px;
+        margin: 10px auto;
+        text-align: center;
+        border-radius: 0.5rem;           /* slightly rounded corners */
+        transition: all 0.3s ease;
+    }
+    
+    select.form-select:hover, 
+    select.form-select:focus {
+        border-color: #d63384;           /* deeper pink on hover/focus */
+        box-shadow: 0 0 8px #f4c2c2;     /* soft glow effect */
+        outline: none;
+    }
+</style>
+
+<!-- Header -->
+<div style="margin: 0 auto; max-width: 1400px; padding: 0 1.5rem;">
+    <header style="background-color: #ffd9e6; border-top: 100px solid #eb437b; border-bottom: 160px solid #cc3366; border-radius: 16px; box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08);">
+        
+        <div class="container py-5">
+            <div class="text-center">
+                <h1 class="display-4 fw-bolder text-dark">Shopping Cart</h1>
+                <p class="lead fw-normal text-dark mb-0">Your Cart</p>
+            </div>
+        </div>
+
+        <div class="container">
+            {% if cart_products %}
+                {% for product in cart_products %}
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="{{ product.image.url }}" class="img-fluid rounded-start" alt="{{ product.name }}">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text">{{ product.description }}</p>
+        
+                                    {% if product.is_sale %}
+                                        <p class="text-warning">Sale!</p>
+                                        <p>
+                                            <del>MAD {{ product.price }}</del><br> ID: {{ product.id }}
+                                            &nbsp;
+                                            <strong>MAD {{ product.sale_price }}</strong>
+                                        </p>
+                                    {% else %}
+                                        <p><strong>MAD {{ product.price }}</strong></p>
+                                    {% endif %}
+                                    <br><br>
+                                    <div>Quantity:</div>
+                                    <select class="form-select" id="select{{ product.id }}">  
+                                        <option selected>
+                                            {% for key, value in quantities.items %}
+                                                {% if key == product.id|stringformat:"s" %}
+                                                    {{ value }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                    
+                                    <a href="{% url 'home' %}" class="btn btn-secondary mt-2">Home</a>
+                                    <button type="button" data-index="{{ product.id }}" class="btn btn-secondary mt-2 update-cart">
+                                        Update 
+                                    </button>
+
+                                    <button type="button" data-index="{{ product.id }}" class="btn btn-danger mt-2 delete-cart">
+                                        Remove 
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div align="right"></div>
+                <h3>Total: Mad{{ totals }}</h3>
+                <a href="{% url 'checkout' %}" class="btn btn-success">Checkout</a>
+                </div>
+            {% else %}
+                <p>There is nothing in your cart...</p>
+            {% endif %}
+        </div>
+    </header>
+</div>
+
+<script>
+    // Update quantity of product in cart
+    $(document).on('click', '.update-cart', function (e) {
+        e.preventDefault();
+        var productid = $(this).data('index');
+        
+        $.ajax({
+            type: 'POST',
+            url: '{% url "cart_update" %}',
+            data: {
+                product_id: productid,
+                product_qty: $('#select' + productid + ' option:selected').text(),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: "post"
+            },
+            success: function (json) {
+                location.reload();
+            },
+            error: function (xhr, errmsg, err) {
+                console.error(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+
+    // Remove product from cart
+    $(document).on('click', '.delete-cart', function (e) {
+        e.preventDefault();
+        var productid = $(this).data('index');  // Retrieve the product ID from the button
+        
+        $.ajax({
+            type: 'POST',
+            url: '{% url "cart_delete" %}',
+            data: {
+                product_id: productid,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: "post"
+            },
+            success: function (json) {
+                location.reload();  // Reload the page to reflect the changes
+            },
+            error: function (xhr, errmsg, err) {
+                console.error(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+</script>
+
+{% endblock %}
